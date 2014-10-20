@@ -4,24 +4,26 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpUriRequest;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 
 import jp.kanagawa.kawasaki.lunchplaces.NetworkAccessRunnable;
+import android.content.res.AssetManager;
 import android.test.AndroidTestCase;
+import android.util.Log;
 
 public class NetworkTest extends AndroidTestCase{
+	
 	NetworkAccessRunnable mNetworkAccessRunnable;
+	
 	protected void setUp() throws Exception {
         super.setUp();
         mNetworkAccessRunnable = new NetworkAccessRunnable();
@@ -48,36 +50,45 @@ public class NetworkTest extends AndroidTestCase{
     }
  
     /**
-     * HttpClient#execute()が正常にレスポンス(200)を返すとき、レスポンスボディが返ること.
+     * レスポンス(200)を返すとき、レスポンスボディが返ること.
      */
     public void testRequestFeed_success() throws Exception {
         // ダミーのHTTPレスポンスボディ
-        InputStream expectedContent = createDummyInputStream();
- 
+        //InputStream expectedContent = createDummyInputStream();
+
+        //InputStream expectedContent = getContext().getResources().getAssets().open("sample.json"); 
+
+        String expectedContent="{\"Employee\":[{\"Age\": 25,\"Name\": \"田中　一郎\"},{\"Age\": 30,\"Name\": \"鈴木　次郎\"}]}";
+        InputStream istreamExpectedContent = new ByteArrayInputStream(expectedContent.getBytes("utf-8"));
+        
         // ダミーのレスポンスボディを返すHttpEntityモック
-        HttpEntity mockHttpEntity = mock(HttpEntity.class);
-        when(mockHttpEntity.getContent()).thenReturn(expectedContent);
- 
+        //HttpEntity mockHttpEntity = mock(HttpEntity.class);
+        //when(mockHttpEntity.getContent()).thenReturn(expectedContent);
+
         // HTTPステータス200を返すStatusLineモック
-        StatusLine mockStatusLine = mock(StatusLine.class);
-        when(mockStatusLine.getStatusCode()).thenReturn(200);
- 
+        //StatusLine mockStatusLine = mock(StatusLine.class);
+        //when(mockStatusLine.getStatusCode()).thenReturn(200);
+
         // 上で定義したモックオブジェクトを返すHttpResponseモック
         // ステータスを確認してからEntityを取得していること（順序）を確認するため、StrictMock.
-        HttpResponse mockResponse = mock(HttpResponse.class);
-        when(mockResponse.getStatusLine()).thenReturn(mockStatusLine);
-        when(mockResponse.getEntity()).thenReturn(mockHttpEntity);
- 
-        // 上で定義したモックオブジェクトを返すHttpClientモック
-        HttpURLConnection mHttpURLConnection = mock(HttpURLConnection.class);
-        when(mHttpURLConnection.getResponseCode()).thenReturn(200);
- 
+        //HttpResponse mockResponse = mock(HttpResponse.class);
+        //when(mockResponse.getStatusLine()).thenReturn(mockStatusLine);
+        //when(mockResponse.getEntity()).thenReturn(mockHttpEntity);
+        
+        // 上で定義したモックオブジェクトを返すモック
+        HttpURLConnection conn = mock(HttpURLConnection.class);
+        when(conn.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
+        //Mockito.when(conn.getHeaderFields()).thenReturn(headers);
+        Mockito.when(conn.getInputStream()).thenReturn(istreamExpectedContent);
+
         // テスト対象のインスタンスフィールドにあるHttpClientをモックに差し替える
-        mNetworkAccessRunnable.connection = mHttpURLConnection;
- 
+        mNetworkAccessRunnable.connection = conn;
+
         // テスト実行
         mNetworkAccessRunnable.run();
-        //assertEquals("Mockに仕込んだInputStreamが返される", expectedContent, actual);
+        Log.d("myapptest",expectedContent);
+        Log.d("myapptest",Integer.toString(mNetworkAccessRunnable.retCode));
+        assertEquals(expectedContent, expectedContent, mNetworkAccessRunnable.str);
  
         // HttpResponseのメソッドが正しい順序で呼ばれたかを検証
         //InOrder inOrder = inOrder(mockResponse);

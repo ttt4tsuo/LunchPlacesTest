@@ -9,6 +9,7 @@ public class MainActivityTest extends
 		ActivityInstrumentationTestCase2<MainActivity> {
 
 	
+	@SuppressWarnings("deprecation")
 	public MainActivityTest() {
 		super("jp.kanagawa.kawasaki.lunchplaces", MainActivity.class);
 	}

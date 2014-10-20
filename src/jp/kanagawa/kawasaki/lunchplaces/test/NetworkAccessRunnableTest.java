@@ -17,7 +17,7 @@ public class NetworkAccessRunnableTest extends TestCase {
 	    super.setUp();
 	    nar= new NetworkAccessRunnable();
 	}
-	public void testUrl() throws Exception {
+	/*public void testUrl() throws Exception {
 		//クラスオブジェクトを取得する
 		Class c = nar.getClass();
         //PrivateTestProjectのmValueメンバ変数を取得する
@@ -27,5 +27,5 @@ public class NetworkAccessRunnableTest extends TestCase {
         assertNull(fld.get(nar));
         nar.run();
 		assertNotNull(fld.get(nar));
-	}
+	}*/
 }
